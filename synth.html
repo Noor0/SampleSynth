@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!--<script src='synthFunction.js'></script>
+	<script src='rotate.js'></script>-->
+	<!--<script src='function.js'></script>-->
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+</head>
+	<body onload="init()">
+		<div id="c" class="container">
+			<div class="synth">
+				<div class="nav">
+					<ul>
+						<li id="pA" onclick="pASelect()">Part A</li>
+						<li id="pB" onclick="pBSelect()">Part B</li>
+						<li id="modNav" onclick="modNavSelect()">Modulation</li>
+						<li id="FXNav" onclick="FXNavSelect()">Effects</li>
+					</ul>
+				</div>
+				<div class="part" id="partA">
+					<div class="oscilators">
+						<div class="osc" id="a1">
+							<table class="wavePanel">
+								<tr>
+									<td id="sawA" onmouseup="sawSelectA()">SAW</td>
+									<td id="sinA" onmouseup="sinSelectA()">SIN</td>
+								</tr>
+								<tr>
+									<td id="pulseA" onmouseup="pulseSelectA()">PULSE</td>
+									<td id="triA" onmouseup="triSelectA()">TRI</td>
+								</tr>
+							</table>
+							<table class="knobPanel">
+								<tr style="height:20%;text-align:center;">
+									<td>Volume</td>
+									<td>Voices</td>
+									<td>Fine</td>
+									<td>Octave</td>
+								</tr>
+								<tr>
+									<td><div id="volumeKnobA" class="knob" onmousedown="VKADown(event)"></div></td>
+									<td><div id="voicesKnobA" class="knob" onmousedown="VOKADown(event)"></div></td>
+									<td><div id="detuneKnobA" class="knob" onmousedown="FKADown(event)"></div></td>
+									<td><div id="octaveKnobA" class="knob" onmousedown="OKADown(event)"></div></td>
+								</tr>
+							</table>
+						</div>
+						<div class="osc" id="a2">
+							<table class="wavePanel">
+									<tr>
+										<td id="sawB" onmouseup="sawSelectB()">SAW</td>
+										<td id="sinB" onmouseup="sinSelectB()">SIN</td>
+									</tr>
+									<tr>
+										<td id="pulseB" onmouseup="pulseSelectB()">PULSE</td>
+										<td id="triB" onmouseup="triSelectB()">TRI</td>
+									</tr>
+							</table>
+							<table class="knobPanel">
+								<tr style="height:20%;text-align:center;">
+									<td>Volume</td>
+									<td>Voices</td>
+									<td>Fine</td>
+									<td>Octave</td>
+								</tr>
+								<tr>
+									<td><div id="volumeKnobB" class="knob" onmousedown="VKBDown(event)"></div></td>
+									<td><div id="voicesKnobB" class="knob" onmousedown="VOKBDown(event)"></div></td>
+									<td><div id="detuneKnobB" class="knob" onmousedown="FKBDown(event)"></div></td>
+									<td><div id="octaveKnobB" class="knob" onmousedown="OKBDown(event)"></div></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<div class="filter">
+						<table class="filterPanel">
+							<tr>
+								<td>Cutoff</td>
+								<td>Resonance</td>
+							</tr>
+							<tr>
+								<td><div id="cutoffKnob" class="knob"></div></td>
+								<td><div id="resonanceKnob" class="knob"></div></td>
+							</tr>
+						</table>
+					</div>
+					<div class="ADSR">
+						<table class="ADSRPanel">
+							<tr>
+								<td>Attack</td>
+								<td>Decay</td>
+								<td>Sustain</td>
+							</tr>
+							<tr>
+								<td><input id="attackA" type="range" orient="vertical" min="0" max="100" value="0"></td>
+								<td><input id="decayA" type="range" orient="vertical" min="0" max="100" value="0"></td>
+								<td><input id="sustainA" type="range" orient="vertical" min="0" max="100" value="100"></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<!--<div id="partB" class="part">
+					<div class="oscilators">
+						<div id="b1" class="osc">
+							
+						</div>
+						<div id="b2" class="osc">
+							
+						</div>
+					</div>
+					<div class="filter">
+					</div>
+					<div class="ADSR">
+					</div>
+				</div>-->	
+		</div>
+		<script type="text/javascript">
+			
+			var select=0;
+			function pASelect(){
+				if(select != 1){
+					kill();
+					document.getElementById('pA').style.borderBottom="2px solid black";
+					select=1;
+				}
+			}
+			pASelect()
+			function pBSelect(){
+				if(select != 2){
+					kill();
+					document.getElementById('pB').style.borderBottom="2px solid black";
+					select=2;
+				}
+			}
+			function modNavSelect(){
+				if(select != 3){
+					kill();
+					document.getElementById('modNav').style.borderBottom="2px solid black";
+					select=3;
+				}
+			}
+			function FXNavSelect(){
+				if(select != 4){
+					kill();
+					document.getElementById('FXNav').style.borderBottom="2px solid black";
+					select=4;
+				}
+			}
+
+			function kill(){
+				document.getElementById('pA').style.borderBottom="0px solid black";
+				document.getElementById('pB').style.borderBottom="0px solid black";
+				document.getElementById('modNav').style.borderBottom="0px solid black";
+				document.getElementById('FXNav').style.borderBottom="0px solid black";
+			}
+
+			
+
+			var vka=false,voka=false,fka=false,oka=false,
+				vkb=false,vokb=false,fkb=false,okb=false,
+				ca=false,ra=false;
+
+			var down=false;
+			var mx=0,my=0;
+			var point=0;
+
+			function killKnob(){
+				vka=false;
+				voka=false;
+				fka=false;
+				oka=false;
+				vkb=false;
+				vokb=false;
+				fkb=false;
+				okb=false;
+				ca=false;
+				ra=false;
+			}
+
+			/*
+			*KNOB DOWNS
+			*/
+			function VKBDown(){
+				killKnob();
+				vkb=true;
+			}
+
+			function VOKBDown(){
+				killKnob();
+				vokb=true;
+			}
+
+			function FKBDown(){
+				killKnob();
+				fkb=true;
+			}
+
+			function OKBDown(){
+				killKnob();
+				okb=true;
+			}
+
+			function VKADown(e){
+				killKnob();
+				vka=true;
+				point=e.pageY;
+			}
+
+			function VOKADown(e){
+				killKnob();
+				voka=true;
+				point=e.pageY;
+			}
+
+			function FKADown(e){
+				killKnob();
+				fka=true;
+				point=e.pageY;
+			}
+
+			function OKADown(e){
+				killKnob();
+				oka=true;
+				point=e.pageY;
+			}
+
+			document.addEventListener("mouseup", function(){
+				killKnob();
+			})
+			 
+			document.onmousemove=function(e){
+				my = e.pageY;
+				//point=my;
+				var rota=0;
+				rota=((my-point) / 1);
+				if(rota<=180 && rota>=0){
+					if(vka==true)
+						mover("volumeKnobA",rota);
+					if(voka==true)
+						mover("voicesKnobA",rota);
+					if(fka==true)
+						mover("detuneKnobA",rota);
+					if(oka==true)
+						mover("octaveKnobA",rota);
+					if(vkb==true)
+						mover("volumeKnobB",rota);
+					if(vokb==true)
+						mover("voicesKnobB",rota);
+					if(fkb==true)
+						mover("detuneKnobB",rota);
+					if(okb==true)
+						mover("octaveKnobB",rota);
+				}
+			}
+
+			function mover(ID,rot){
+				document.getElementById(''+ID+'').style.transform="rotate("+rot+"deg)";
+				document.getElementById(''+ID+'').style.mozTransform="rotate("+rot+"deg)";
+				document.getElementById(''+ID+'').style.webkitTransform="rotate("+rot+"deg)";
+				document.getElementById(''+ID+'').style.OTransform="rotate("+rot+"deg)";
+				document.getElementById(''+ID+'').style.msTransform="rotate("+rot+"deg)";
+			}
+			
+
+
+
+			/*
+			WEB AUDIO API KI CODING B-|
+
+			*/
+			var oscA,oscB,
+				volA,volB,
+				att,dec,sus,rel,
+				octaveA,octaveB,octaveMain,
+				stdf=440,note=0;
+			function init(){
+				context=new AudioContext();
+				oscA=context.createOscillator();
+				oscA.type='sine';
+				oscB=context.createOscillator();
+				oscB.type='sine';
+				changer('sin',1);
+				changer('sin',2);
+				volA=context.createGain();
+				oscA.connect(volA);
+				oscA.start();
+				volB=context.createGain();
+				oscB.connect(volB);
+				oscB.start();
+			}
+
+			/*general method for wave selection*/
+			function changer(id,oscPanel){
+				var tds=['saw','sin','pulse','tri'];
+				if(oscPanel==1){
+					for(var i=0;i<tds.length;i++){
+						var asd=tds[i]+'A';
+						document.getElementById(asd).style.background='#EEEEEE';
+					}
+					id=id+'A';
+					document.getElementById(id).style.background='white';
+				}
+				if(oscPanel==2){
+					for(var i=0;i<tds.length;i++){
+						var asd=tds[i]+'B';
+						document.getElementById(asd).style.background='#EEEEEE';
+					}
+					id=id+'B';
+					document.getElementById(id).style.background='white';
+				}
+			}
+
+			function sawSelectA(){
+				oscA.type='sawtooth';
+				changer('saw',1);
+			}
+
+			function sinSelectA(){
+				oscA.type='sine';
+				changer('sin',1);
+			}
+
+			function pulseSelectA(){
+				oscA.type='square';
+				changer('pulse',1);
+			}
+
+			function triSelectA(){
+				oscA.type='triangle';
+				changer('tri',1);
+			}
+
+			function sawSelectB(){
+				oscB.type='sawtooth';
+				changer('saw',2);
+			}
+
+			function sinSelectB(){
+				oscB.type='sine';
+				changer('sin',2);
+			}
+
+			function pulseSelectB(){
+				oscB.type='square';
+				changer('pulse',2);
+			}
+
+			function triSelectB(){
+				oscB.type='triangle';
+				changer('tri',2);
+			}
+
+			/*keyboard playing */
+
+			window.addEventListener('keydown',function(e){
+				switch(e.keyCode){
+					case 81:{
+						playing(noteCalculation(-9));
+						break;
+					}
+					case 50:{
+						playing(noteCalculation(-8));
+						break;
+					}
+					case 87:{
+						playing(noteCalculation(-7));
+						break;
+					}
+					case 51:{
+						playing(noteCalculation(-6));
+						break;
+					}
+					case 69:{
+						playing(noteCalculation(-5));
+						break;
+					}
+					case 82:{
+						playing(noteCalculation(-4));
+						break;
+					}
+					case 53:{
+						playing(noteCalculation(-3));
+						break;
+					}
+					case 84:{
+						playing(noteCalculation(-2));
+						break;
+					}
+					case 54:{
+						playing(noteCalculation(-1));
+						break;
+					}
+					case 89:{
+						playing(noteCalculation(0));
+						break;
+					}
+					case 55:{
+						playing(noteCalculation(1));
+						break;
+					}
+					case 85:{
+						playing(noteCalculation(2));
+						break;
+					}
+					case 73:{
+						playing(noteCalculation(3));
+						break;
+					}
+					case 73:{
+						playing(noteCalculation(4));
+						break;
+					}
+					case 79:{
+						playing(noteCalculation(5));
+						break;
+					}
+					case 48:{
+						playing(noteCalculation(6));
+						break;
+					}
+					case 80:{
+						playing(noteCalculation(7));
+						break;
+					}
+					case 219:{
+						playing(noteCalculation(8));
+						break;
+					}
+					case 187:{
+						playing(noteCalculation(9));
+						break;
+					}
+					case 221:{
+						playing(noteCalculation(10));
+						break;
+					}
+				}
+			});
+			window.addEventListener('keyup',function(){
+				/*oscA.disconnect();
+				oscB.disconnect();*/
+				volA.disconnect();
+				volB.disconnect();
+			});
+
+			function playing(calcNote){
+				oscA.frequency.value=calcNote;
+				oscB.frequency.value=calcNote;
+				/*oscA.connect(context.destination);
+				oscB.connect(context.destination);*/
+				volA.connect(context.destination);
+				volB.connect(context.destination);
+			}
+
+
+			function noteCalculation(note){
+				//notetobeplaye=stdf*(2^(note/12))
+				if(note==0)
+					return stdf;
+				else
+					return stdf*Math.pow(2, note / 12);
+				
+			}
+		</script>
+	</body>
+</html>
